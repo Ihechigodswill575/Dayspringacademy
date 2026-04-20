@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Portal — Day Spring Academy</title>
+  <meta name="robots" content="noindex,nofollow"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/admin-extra.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+</head>
+<body class="admin-page">
+<div class="copy-toast" id="copy-toast">URL copied!</div>
+
+<!-- LOGIN -->
+<div id="admin-login-wrap" class="admin-login-wrap">
+  <div class="admin-login-card" style="position:relative;">
+    <div class="login-loading" id="login-loading"><div class="spin"></div></div>
+    <div class="admin-login-logo">
+      <div class="logo-icon">DSA</div>
+      <h2>Admin Portal</h2>
+      <p>Day Spring Academy — Firebase Auth</p>
+    </div>
+    <form id="admin-login-form" novalidate>
+      <div class="admin-form-group">
+        <label class="admin-label" for="admin-email">Email Address</label>
+        <input type="email" id="admin-email" class="admin-input" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="admin-form-group">
+        <label class="admin-label" for="admin-password">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="admin-password" class="admin-input" placeholder="••••••••" autocomplete="current-password"/>
+          <button type="button" onclick="togglePw()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:1rem;">👁</button>
+        </div>
+      </div>
+      <p class="admin-error" id="admin-login-error"></p>
+      <button type="submit" class="admin-login-btn" id="login-btn">Sign In with Firebase</button>
+    </form>
+    <p style="text-align:center;margin-top:24px;font-size:.78rem;color:rgba(255,255,255,.2);">
+      Secured by Firebase Authentication.<br>
+      <a href="index.html" style="color:rgba(255,255,255,.25);text-decoration:underline;margin-top:8px;display:inline-block;">← Return to Website</a>
+    </p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="admin-dashboard" class="admin-dashboard" style="display:none;">
+
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-header">
+      <div class="admin-sidebar-logo"><div class="icon">DSA</div><span>Day Spring</span></div>
+      <div class="admin-role-badge">● Firebase Authenticated</div>
+    </div>
+    <nav class="admin-nav">
+      <button class="admin-nav-item active" data-tab="tab-dashboard"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></button>
+      <button class="admin-nav-item" data-tab="tab-inquiries"><span class="nav-icon">📬</span><span class="nav-text">Admissions Inquiries</span></button>
+      <button class="admin-nav-item" data-tab="tab-announcements"><span class="nav-icon">📢</span><span class="nav-text">Announcements</span></button>
+      <button class="admin-nav-item" data-tab="tab-new-announcement"><span class="nav-icon">✏️</span><span class="nav-text">New Announcement</span></button>
+      <button class="admin-nav-item" data-tab="tab-images"><span class="nav-icon">🖼️</span><span class="nav-text">Image Manager</span></button>
+      <div class="admin-nav-divider"></div>
+      <a href="index.html" style="text-decoration:none;"><button class="admin-nav-item"><span class="nav-icon">🌐</span><span class="nav-text">View Website</span></button></a>
+      <button class="admin-nav-item" onclick="adminLogout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></button>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button onclick="toggleSidebar()" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:1.3rem;padding:4px;">☰</button>
+        <h2 id="admin-page-title">Dashboard</h2>
+      </div>
+      <div class="admin-topbar-actions">
+        <div class="auth-status"><div class="auth-dot"></div><span class="admin-user-email">Admin</span></div>
+        <button class="admin-logout-btn" onclick="adminLogout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- DASHBOARD -->
+      <div class="admin-tab active" id="tab-dashboard">
+        <div style="background:linear-gradient(135deg,var(--primary),#1a3580);border-radius:14px;padding:28px 32px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div>
+            <h3 style="color:#fff;margin-bottom:6px;">Welcome back, Administrator 👋</h3>
+            <p class="admin-user-email" style="color:rgba(255,255,255,.55);font-size:.88rem;">Day Spring Academy</p>
+          </div>
+          <a href="index.html" class="btn btn-gold" style="font-size:.8rem;">View Live Site</a>
+        </div>
+        <div class="admin-stats-grid">
+          <div class="admin-stat-card"><div class="stat-label">Total Inquiries</div><div class="stat-num" id="stat-inquiries">—</div><div class="stat-change">↑ 3 this week</div></div>
+          <div class="admin-stat-card"><div class="stat-label">Pending Review</div><div class="stat-num" id="stat-pending" style="color:#fbbf24;">—</div><div class="stat-change" style="color:#fbbf24;">Needs attention</div></div>
+          <div class="admin-stat-card"><div class="stat-label">Announcements</div><div class="stat-num" id="stat-announcements">—</div><div class="stat-change">Published</div></div>
+          <div class="admin-stat-card"><div class="stat-label">Images in Library</div><div class="stat-num" id="stat-images">0</div><div class="stat-change">Cloudinary uploads</div></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header">
+            <h3>Recent Inquiries</h3>
+            <button data-tab="tab-inquiries" style="padding:8px 16px;font-size:.8rem;color:rgba(255,255,255,.5);background:rgba(255,255,255,.05);border-radius:6px;border:none;cursor:pointer;font-family:var(--font-body);">View All</button>
+          </div>
+          <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Parent</th><th>Student</th><th>Grade</th><th>Date</th><th>Status</th></tr></thead><tbody id="dashboard-inquiries-preview"></tbody></table></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:20px;">
+          <button class="quick-action-card" data-tab="tab-new-announcement"><div style="font-size:1.6rem;margin-bottom:10px;">✏️</div><div style="color:#fff;font-size:.9rem;font-weight:600;margin-bottom:4px;">New Announcement</div><div style="color:rgba(255,255,255,.35);font-size:.78rem;">Publish a school update</div></button>
+          <button class="quick-action-card" data-tab="tab-images"><div style="font-size:1.6rem;margin-bottom:10px;">🖼️</div><div style="color:#fff;font-size:.9rem;font-weight:600;margin-bottom:4px;">Upload Images</div><div style="color:rgba(255,255,255,.35);font-size:.78rem;">Add to media library</div></button>
+          <button class="quick-action-card" data-tab="tab-inquiries"><div style="font-size:1.6rem;margin-bottom:10px;">👨‍👩‍👧</div><div style="color:#fff;font-size:.9rem;font-weight:600;margin-bottom:4px;">Review Inquiries</div><div style="color:rgba(255,255,255,.35);font-size:.78rem;">Respond to applicants</div></button>
+          <button class="quick-action-card" data-tab="tab-announcements"><div style="font-size:1.6rem;margin-bottom:10px;">📋</div><div style="color:#fff;font-size:.9rem;font-weight:600;margin-bottom:4px;">Manage Posts</div><div style="color:rgba(255,255,255,.35);font-size:.78rem;">Edit or delete posts</div></button>
+        </div>
+      </div>
+
+      <!-- INQUIRIES -->
+      <div class="admin-tab" id="tab-inquiries">
+        <div style="margin-bottom:24px;"><h3 style="color:#fff;margin-bottom:4px;">Admissions Inquiries</h3><p style="color:rgba(255,255,255,.4);font-size:.85rem;">Update statuses and track all applications.</p></div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>All Inquiries</h3><span style="color:rgba(255,255,255,.3);font-size:.8rem;" id="inquiry-count"></span></div>
+          <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Parent</th><th>Email</th><th>Student</th><th>Grade</th><th>Date</th><th>Status</th></tr></thead><tbody id="inquiries-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS LIST -->
+      <div class="admin-tab" id="tab-announcements">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+          <div><h3 style="color:#fff;margin-bottom:4px;">Announcements</h3><p style="color:rgba(255,255,255,.4);font-size:.85rem;">Manage published announcements.</p></div>
+          <button class="admin-submit-btn" onclick="switchTab('tab-new-announcement')">+ New</button>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Published</h3></div>
+          <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Author</th><th>Actions</th></tr></thead><tbody id="announcements-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- NEW ANNOUNCEMENT -->
+      <div class="admin-tab" id="tab-new-announcement">
+        <div style="margin-bottom:24px;"><h3 style="color:#fff;margin-bottom:4px;">New Announcement</h3><p style="color:rgba(255,255,255,.4);font-size:.85rem;">Fill in the details and publish to the website.</p></div>
+        <div class="admin-form-wrap">
+          <h3>Announcement Details</h3>
+          <form id="announcement-form">
+            <div class="admin-form-group"><label>Title <span style="color:#f87171;">*</span></label><input type="text" name="ann-title" class="admin-form-control" placeholder="e.g. Inter-House Sports Day 2026" required/></div>
+            <div class="admin-form-group"><label>Category</label>
+              <select name="ann-category" class="admin-form-control"><option value="Update">Update</option><option value="Event">Event</option><option value="Achievement">Achievement</option><option value="Notice">Notice</option></select>
+            </div>
+            <div class="admin-form-group"><label>Content <span style="color:#f87171;">*</span></label><textarea name="ann-content" class="admin-form-control" rows="7" placeholder="Full announcement text…" required></textarea></div>
+            <div class="admin-form-group">
+              <label>Featured Image</label>
+              <div class="img-url-field-wrap">
+                <input type="url" name="ann-image" id="ann-image-url" class="admin-form-control" placeholder="Paste Cloudinary URL or use Pick from Library →" style="padding-right:160px;"/>
+                <button type="button" class="img-url-pick-btn" onclick="goPickImage()">📁 Pick from Library</button>
+              </div>
+              <div id="ann-image-preview" style="display:none;margin-top:12px;border-radius:10px;overflow:hidden;height:160px;"><img id="ann-preview-img" src="" alt="Preview" style="width:100%;height:160px;object-fit:cover;display:block;"/></div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <button type="submit" class="admin-submit-btn">Publish Announcement</button>
+              <button type="reset" style="padding:12px 24px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:.88rem;cursor:pointer;font-family:var(--font-body);">Clear</button>
+            </div>
+            <div id="ann-success" style="display:none;margin-top:18px;padding:16px 20px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:10px;color:#34d399;font-size:.9rem;">✅ Announcement published successfully!</div>
+          </form>
+        </div>
+      </div>
+
+      <!-- IMAGE MANAGER -->
+      <div class="admin-tab" id="tab-images">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+          <div><h3 style="color:#fff;margin-bottom:4px;">Image Manager</h3><p style="color:rgba(255,255,255,.4);font-size:.85rem;">Upload images to Cloudinary and use them across the site.</p></div>
+          <div class="pick-mode-banner" id="pick-mode-banner">📌 Pick Mode — click any image to insert into announcement<button onclick="exitPickMode()" style="background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:1rem;margin-left:8px;">✕</button></div>
+        </div>
+        <div class="preset-notice"><p><strong>⚡ One-time Cloudinary setup:</strong> In your <a href="https://cloudinary.com/console/settings/upload" target="_blank" rel="noopener" style="color:#fbbf24;text-decoration:underline;">Cloudinary dashboard → Settings → Upload → Upload presets</a>, click <strong>Add upload preset</strong>, name it <strong>day_spring_academy</strong>, set Signing mode to <strong>Unsigned</strong>, folder to <strong>day-spring-academy</strong>, then Save. Uploads will work instantly after that.</p></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+          <div class="admin-form-wrap" style="padding:24px;">
+            <h3 style="margin-bottom:20px;">Upload New Image</h3>
+            <div class="upload-zone" id="upload-zone">
+              <input type="file" id="image-file-input" accept="image/png,image/jpeg,image/webp,image/gif" multiple/>
+              <span class="upload-zone-icon">📤</span>
+              <div class="upload-zone-title">Click to choose or drag &amp; drop</div>
+              <div class="upload-zone-sub">PNG · JPG · WEBP · GIF — up to 10 MB</div>
+              <span class="upload-zone-badge">Cloudinary · dzxckgbzp</span>
+            </div>
+            <div class="upload-progress-wrap" id="upload-progress-wrap"><div class="upload-progress-bar-track"><div class="upload-progress-bar-fill" id="upload-progress-fill"></div></div><div class="upload-progress-label" id="upload-progress-label">Uploading…</div></div>
+            <div id="upload-error" style="display:none;margin-top:14px;padding:12px 16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:.83rem;line-height:1.5;"></div>
+            <div class="upload-preview" id="upload-preview">
+              <img id="upload-preview-img" src="" alt="Uploaded"/>
+              <div class="upload-preview-body">
+                <p style="color:rgba(255,255,255,.4);font-size:.72rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Cloudinary URL</p>
+                <div class="upload-preview-url" id="upload-preview-url"></div>
+                <button class="upload-copy-btn" id="upload-copy-btn" onclick="copyUploadedUrl()">📋 Copy URL</button>
+                <button class="upload-copy-btn" onclick="useInAnnouncement()" style="background:rgba(30,64,175,.15);color:#60a5fa;border-color:rgba(30,64,175,.3);">✏️ Use in Announcement</button>
+              </div>
+            </div>
+          </div>
+          <div class="admin-form-wrap" style="padding:24px;">
+            <h3 style="margin-bottom:20px;">Cloudinary Account</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:13px 16px;"><div style="font-size:.7rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Cloud Name</div><code style="color:#fff;font-size:.9rem;">dzxckgbzp</code></div>
+              <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:13px 16px;"><div style="font-size:.7rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">API Key</div><code style="color:#fff;font-size:.9rem;">166123442148894</code></div>
+              <div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:13px 16px;"><div style="font-size:.7rem;color:rgba(212,175,55,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Upload Preset (create this)</div><code style="color:var(--gold);font-size:.9rem;">day_spring_academy</code></div>
+            </div>
+            <a href="https://cloudinary.com/console" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;margin-top:18px;padding:12px 18px;background:rgba(30,64,175,.12);color:#60a5fa;border:1px solid rgba(30,64,175,.22);border-radius:8px;font-size:.83rem;font-weight:600;text-decoration:none;">🌩 Open Cloudinary Dashboard ↗</a>
+          </div>
+        </div>
+        <div class="admin-form-wrap" style="margin-top:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+            <h3>Media Library <span id="media-count" style="color:rgba(255,255,255,.3);font-size:.85rem;font-family:var(--font-body);font-weight:400;margin-left:8px;"></span></h3>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <input type="text" id="media-search" placeholder="🔍 Search…" oninput="filterMedia(this.value)" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 14px;color:#fff;font-size:.82rem;font-family:var(--font-body);outline:none;width:160px;"/>
+              <button onclick="clearMediaLibrary()" style="background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:8px 14px;font-size:.78rem;cursor:pointer;font-family:var(--font-body);">Clear All</button>
+            </div>
+          </div>
+          <p style="color:rgba(255,255,255,.28);font-size:.8rem;margin-bottom:4px;"><strong style="color:rgba(255,255,255,.45);">Copy</strong> URL · <strong style="color:rgba(255,255,255,.45);">Use</strong> in announcement · <strong style="color:rgba(255,255,255,.45);">Del</strong> to remove</p>
+          <div class="media-library-grid" id="media-library-grid" style="display:none;"></div>
+          <div id="media-empty" style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.2);font-size:.9rem;">No images yet. Upload your first image above! 🖼️</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/admin-firebase.js"></script>
+</body>
+</html>
